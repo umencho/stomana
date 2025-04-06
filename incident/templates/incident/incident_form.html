@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}
+    Create Incident
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <h1>Create Incident</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const locationField = document.getElementById('id_location');
+        const areaField = document.getElementById('id_area');
+
+        locationField.addEventListener('change', function () {
+            const location = this.value;
+            fetch(`/incident/get_areas/?location=${location}`)
+                .then(response => response.json())
+                .then(data => {
+                    areaField.innerHTML = '';
+                    data.areas.forEach(area => {
+                        const option = document.createElement('option');
+                        option.value = area.id;
+                        option.textContent = area.name;
+                        areaField.appendChild(option);
+                    });
+                });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Create Type Incident{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <h1>Create Type Incident</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save</button>
+    </form>
+</div>
+{% endblock %}

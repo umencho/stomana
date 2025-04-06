@@ -1,0 +1,144 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+{% block content %}
+<div class="statistics-wrapper d-flex">
+    <article class="mb-4 flex-grow-1">
+        <p>Maximum Days between two accident: <span class="highlight">{{ max_days }}</span>👍 </p>
+        <p>HS Incidents 2025: {{ inc2025 }}</p> 
+        <p>Days since the last HS event: {{ nr_days }} 
+            {% if nr_days < 2 %}
+                <span class="blinking"> ⚠️ </span>
+            {% endif %}
+        </p>
+        {% if last_incident and nr_days < 21 %}
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Newest Incident</h2>
+                <p class="card-text">Title: {{ last_incident.title }}</p>
+                <p class="card-text">Date: {{ last_incident.date }}</p>
+                <p class="card-text">Location: {{ last_incident.location }}</p>
+                <p class="card-text">Description: {{ last_incident.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </article>
+
+    <div class="chart-container flex-shrink-0">
+        <canvas id="locationPieChart" class="responsive-canvas"></canvas>
+    </div>
+</div>
+
+
+{% block scripts %}
+    <!-- Load jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Load Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Load Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@latest"></script>
+    
+
+    <!-- Custom Script -->
+    <script>
+        Chart.register(ChartZoom);
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const ctx = document.getElementById('locationPieChart').getContext('2d');
+                const locationData = JSON.parse('{{ location_data|escapejs }}');
+                const labels = locationData.map(item => item.location);
+                const data = locationData.map(item => item.count);
+
+                const pieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Incidents by Location',
+                            data: data,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                rotation: 0,
+                            },
+                            zoom: {
+                                pan: {
+                                    enabled: true,
+                                    mode: 'xy'
+                                },
+                                zoom: {
+                                    wheel: {
+                                        enabled: true,
+                                        mode: 'xy'
+                                    },
+                                    drag: {
+                                        enabled: true,
+                                        mode: 'xy'
+                                    },
+                                    pinch: {
+                                        enabled: true,
+                                        mode: 'xy'
+                                    }
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                            text: 'Incidents by Location'
+                        }
+                    }
+                });
+                let currentSegment = 0;
+                function animateSegment() {
+                    const segments = pieChart.data.datasets[0].data.length;
+                    pieChart.options.animation = {
+                        duration: 3000,
+                        easing: 'easeInOutBounce',
+                        onComplete: function() {
+                            currentSegment = (currentSegment + 1) % segments;
+                            pieChart.data.datasets[0].backgroundColor = pieChart.data.datasets[0].backgroundColor.map((color, index) => {
+                                return color;
+                            });
+                            pieChart.update();
+                        }
+                    };
+                    pieChart.update();
+                }
+
+                animateSegment();
+                setInterval(animateSegment, 3000);
+            } 
+            catch (error) {
+                console.error('Error initializing pie chart:', error);
+            }
+        });
+    </script>
+{% endblock %}
+{% endblock %}

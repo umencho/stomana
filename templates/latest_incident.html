@@ -1,0 +1,21 @@
+{% extends 'layout.html'%}
+{% block title %}
+    Last Incident
+{% endblock %}
+
+{% block content %}
+    <meta http-equiv="refresh" content="5;url={% url 'homepage' %}">
+    <section>
+    <h1>Last Incident</h1>
+     {% for incident in incidents %}
+      <article class="incident">
+<tr>
+    <p>{{ incident.title }}</p>
+    <p>{{ incident.date }}</p>
+    <p>{{ incident.location }}</p>
+    <p>{{ incident.description }}</p>
+</tr>
+     </article>
+     {% endfor %}
+    </section>
+{% endblock %}

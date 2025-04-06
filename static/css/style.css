@@ -249,3 +249,9 @@ nav a {
     list-style: none; /* Remove bullet points */
     margin: 0; /* Remove default margin */}
 
+#datetime {
+        color: white; /* Adjust color as needed */
+        font-size: 14px; /* Adjust size as needed */
+        margin-left: auto; /* Push to the right */
+    }
+
